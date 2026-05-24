@@ -1,17 +1,15 @@
-import { test, expect } from "@playwright/test";
+﻿import { test, expect } from "@playwright/test";
 
 test.describe("Homepage", () => {
   test("renders with article list", async ({ page }) => {
     await page.goto("/");
     await expect(page.locator("h1")).toHaveText("zaduma");
-    // Check that article links are present
+    // Check that page links are present
     const articles = page.locator("ul li a");
-    await expect(articles).toHaveCount(7);
+    await expect(articles).toHaveCount(11);
     // Verify some known titles
-    await expect(page.getByText("OG Images")).toBeVisible();
-    await expect(page.getByText("Asides")).toBeVisible();
-    await expect(page.getByText("Shiki Twoslash")).toBeVisible();
-    await expect(page.getByText("Markdown Cheat Sheet")).toBeVisible();
+    await expect(page.getByText("About")).toBeVisible();
+    await expect(page.getByText("Projects")).toBeVisible();
   });
 });
 
@@ -80,7 +78,7 @@ test("homepage is readable on mobile", async ({ page }, testInfo) => {
   await page.goto("/");
   await expect(page.locator("h1")).toBeVisible();
   const articles = page.locator("ul li a");
-  await expect(articles).toHaveCount(7);
+  await expect(articles).toHaveCount(11);
   // Content should not overflow
   const body = page.locator("body");
   const box = await body.boundingBox();

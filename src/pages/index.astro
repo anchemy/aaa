@@ -1,26 +1,8 @@
----
+﻿---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { formatDate } from "../lib/formatDate";
 import { Link } from "../lib/Link";
 import { Paragraph } from "../lib/prose/Paragraph";
-import type { PostFrontmatter } from "../types";
-
-const postModules = import.meta.glob<{ frontmatter: PostFrontmatter }>(
-  "../../posts/**/*.mdx",
-  { eager: true },
-);
-let posts = Object.values(postModules);
-
-if (import.meta.env.PROD) {
-  posts = posts.filter((post) => !post.frontmatter.draft);
-}
-
-posts.sort((a, b) => {
-  return (
-    new Date(b.frontmatter.date).getTime() -
-    new Date(a.frontmatter.date).getTime()
-  );
-});
+import { sitePages, sitePageHref } from "../lib/sitePages";
 ---
 
 <BaseLayout
@@ -46,33 +28,28 @@ posts.sort((a, b) => {
   </main>
   <ul>
     {
-      posts.map(({ frontmatter }) => {
-        const date = new Date(frontmatter.date);
-
-        return (
-          <li>
-            <Link
-              href={frontmatter.path}
-              class="flex flex-row justify-between gap-2"
-              noUnderline
+      sitePages.map((page) => (
+        <li>
+          <Link
+            href={sitePageHref(page.slug)}
+            class="flex flex-row justify-between gap-2"
+            noUnderline
+          >
+            <h2 class="font-sans text-gray-800 dark:text-gray-300">
+              {page.title}
+            </h2>
+            <span
+              class="page-description shrink-0 tabular-nums tracking-tighter text-gray-600 dark:text-gray-400"
             >
-              <h2 class="font-sans text-gray-800 dark:text-gray-300">
-                {frontmatter.title}
-              </h2>
-              <time
-                datetime={date.toISOString()}
-                class="shrink-0 tabular-nums tracking-tighter text-gray-600 dark:text-gray-400"
-              >
-                {formatDate(date)}
-              </time>
-            </Link>
-          </li>
-        );
-      })
+              {page.description}
+            </span>
+          </Link>
+        </li>
+      ))
     }
   </ul>
   <style>
-    ul:hover li:not(:hover) :where(h2, time) {
+    ul:hover li:not(:hover) :where(h2, .page-description) {
       @apply text-gray-600 transition-colors;
       :global(.dark) & {
         @apply text-gray-500;

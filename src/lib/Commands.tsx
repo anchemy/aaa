@@ -1,4 +1,4 @@
-import {
+﻿import {
   createEffect,
   createSignal,
   type JSX,
@@ -31,9 +31,9 @@ import { Shortcut } from "./Shortcut";
 const INPUT_ID = "command-input";
 
 export function Commands({
-  posts,
+  pages,
 }: {
-  posts: { title: string; href: string }[];
+  pages: { title: string; href: string }[];
 }) {
   const [clientside, setClientside] = createSignal(false);
   onMount(() => setClientside(true)); // workaround for Astro + Solid Hydration issue
@@ -42,18 +42,18 @@ export function Commands({
     <CommandCenter inputId={INPUT_ID}>
       <CommandCenterTrigger class="zaduma-hover-before -mx-4 h-12 w-12 rounded-sm dark:text-gray-400 dark:hover:text-gray-300" />
       <Show when={clientside()} keyed>
-        <CommandsPalette posts={posts} />
+        <CommandsPalette pages={pages} />
       </Show>
     </CommandCenter>
   );
 }
 
 export function CommandsPalette({
-  posts,
+  pages,
 }: {
-  posts: { title: string; href: string }[];
+  pages: { title: string; href: string }[];
 }) {
-  type CommandsPage = "posts" | "theme" | undefined;
+  type CommandsPage = "pages" | "theme" | undefined;
   const { getInputValue } = useCommandCenterCtx();
 
   const [page, setPage] = createSignal<CommandsPage>();
@@ -119,7 +119,7 @@ export function CommandsPalette({
       () => {
         if (dialog && !dialog.open) dialog.showModal();
         document.getElementById(INPUT_ID)?.focus();
-        setPage("posts");
+        setPage("pages");
       },
     ],
   ]);
@@ -178,9 +178,12 @@ export function CommandsPalette({
               <CommandItem shortcut="alt+t" onClick={handleShortcut}>
                 Set Theme
               </CommandItem>
-              <CommandGroup heading={<GroupHeading>Posts</GroupHeading>}>
+              <CommandGroup heading={<GroupHeading>Pages</GroupHeading>}>
+                {pages.map((p) => (
+                  <CommandItem href={p.href}>{p.title}</CommandItem>
+                ))}
                 <CommandItem shortcut="alt+slash" onClick={handleShortcut}>
-                  Search Posts
+                  Search Pages
                 </CommandItem>
               </CommandGroup>
               <CommandGroup heading={<GroupHeading>Links</GroupHeading>}>
@@ -209,9 +212,9 @@ export function CommandsPalette({
               Set Theme to System
             </CommandItem>
           </Match>
-          <Match when={page() === "posts"}>
-            <CommandGroup heading={<GroupHeading>Posts</GroupHeading>}>
-              {posts.map((p) => (
+          <Match when={page() === "pages"}>
+            <CommandGroup heading={<GroupHeading>Pages</GroupHeading>}>
+              {pages.map((p) => (
                 <CommandItem href={p.href}>{p.title}</CommandItem>
               ))}
             </CommandGroup>

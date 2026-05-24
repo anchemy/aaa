@@ -10,6 +10,7 @@ import ScrollbarStyles from "../lib/ScrollbarStyles.astro";
 import { websiteSchema } from "../lib/seo/jsonLd";
 import JsonLd from "../lib/seo/JsonLd.astro";
 import SocialCardMetaTags from "../lib/SocialCardMetaTags.astro";
+import { sitePages, sitePageHref } from "../lib/sitePages";
 import type { PostFrontmatter } from "../types";
 
 import "../global-styles/base.css";
@@ -43,6 +44,11 @@ const posts = postEntries
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 const postPaths = new Set(posts.map((p) => p.href));
+
+const pages = sitePages.map((p) => ({
+  href: sitePageHref(p.slug),
+  title: p.title,
+}));
 
 // Normalize trailing slash before lookup
 const rawPathname = Astro.url.pathname.replace(/\/$/, "") || "/";
@@ -105,7 +111,7 @@ const websiteData = websiteSchema({
         <slot name="header-content">
           <Link href="/">← back</Link>
         </slot>
-        <Commands client:load posts={posts} />
+        <Commands client:load pages={pages} />
       </header>
       <slot />
       <GrainOverlay opacity={0.25} />

@@ -1,0 +1,20 @@
+﻿---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { sitePages } from "../lib/sitePages";
+
+export function getStaticPaths() {
+  return sitePages.map((page) => ({
+    params: { page: page.slug },
+    props: page,
+  }));
+}
+
+const { title, description } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="zaduma-prose py-10">
+    <h1>{title}</h1>
+    <p>{description}</p>
+  </main>
+</BaseLayout>
