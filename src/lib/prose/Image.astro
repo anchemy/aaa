@@ -20,10 +20,11 @@ import {
   type RemoteImageProps,
 } from "astro:assets";
 import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { getPlaiceholder } from "plaiceholder";
 
 import "./Image.css";
+
+type LocalImageMetadata = ImageMetadata & { fsPath?: string };
 
 // All* images with `src`s starting from / are imported from `src/images/` folder.
 const SRC_IMAGES_PREFIX = "/";
@@ -60,7 +61,7 @@ if (typeof src === "object") {
 
 const pathToImage = decodeURIComponent(
   src.startsWith(SRC_IMAGES_PREFIX)
-    ? `../../../src/images${src.slice(SRC_IMAGES_PREFIX.length - 1)}`
+    ? `../../images${src.slice(SRC_IMAGES_PREFIX.length - 1)}`
     : src,
 );
 let importedImage = null;
@@ -99,15 +100,15 @@ if (isRaw) {
       false,
       string,
       { default: ImageMetadata }
-    >("../../../src/images/**/*");
+    >("../../images/**/*");
 
-    try {
-      importedImage = (await allImages[pathToImage.replace("../src/", "")]!())
-        .default;
-    } catch (err) {
-      console.error({ allImages, pathToImage });
-      throw err;
+    const imageModule = allImages[pathToImage];
+    if (!imageModule) {
+      throw new Error(
+        `Image not found: ${pathToImage}. Available: ${Object.keys(allImages).join(", ")}`,
+      );
     }
+    importedImage = (await imageModule()).default as LocalImageMetadata;
     props.width ??= importedImage.width;
     props.height ??= importedImage.height;
     if (importedImage.format === "jpg") {
@@ -119,14 +120,13 @@ if (isRaw) {
     ? fetch(pathToImage).then(async (res) =>
         Buffer.from(await res.arrayBuffer()),
       )
-    : readFile(
-        path.join(
-          process.cwd(),
-          "src",
-          "images",
-          decodeURIComponent(src.replace(/^\//, "")),
-        ),
-      ));
+    : (() => {
+        const fsPath = importedImage?.fsPath;
+        if (!fsPath) {
+          throw new Error(`Image fsPath not found: ${pathToImage}`);
+        }
+        return readFile(fsPath);
+      })());
 
   const { metadata, css } = await getPlaiceholder(imageForPlaceholder, {
     size: 10,
