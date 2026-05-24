@@ -5,10 +5,15 @@ interface Props {
 
 let { ogImage } = Astro.props;
 
-if (ogImage) {
-  ogImage = ogImage.startsWith("/api/og")
-    ? new URL(ogImage, import.meta.env.PUBLIC_URL).href
-    : ogImage;
+if (ogImage && ogImage.startsWith("/api/og")) {
+  try {
+    const baseUrl = import.meta.env.PUBLIC_URL || import.meta.env.SITE;
+    if (baseUrl) {
+      ogImage = new URL(ogImage, baseUrl).href;
+    }
+  } catch {
+    // If URL construction fails, keep the original ogImage
+  }
 }
 ---
 
